@@ -1,35 +1,31 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.integrate import quad
+from scipy.integrate import cumtrapz
 
-# 假设曲率和弧长的关系是线性的
-# k(s) = k0 + k1 * s
-k0 = 0.1  # 初始曲率
-k1 = 0.05 # 曲率随弧长变化的速率
+# 定义弧长-曲率关系
+def kappa(s):
+    return np.sin(s)
 
-# 定义曲率函数
-def curvature(s):
-    return k0 + k1 * s
+# 定义初始条件
+theta0 = 0  # 初始角度
+x0, y0 = 0, 0  # 初始点
 
-# 计算某点处的切线方向角
-def tangent_angle(s):
-    angle, _ = quad(curvature, 0, s)
-    return angle
+# 定义弧长范围
+s = np.linspace(0, 10, 1000)
 
-# 示例：计算s = 10处的切线方向角
-s = 10
-angle = tangent_angle(s)
-print(f"The tangent angle at s = {s} is {np.degrees(angle):.2f} degrees.")
+# 计算切线角度 theta(s)
+theta = cumtrapz(kappa(s), s, initial=0) + theta0
 
-# 绘制曲线和切线方向
-s_values = np.linspace(0, 20, 100)
-angles = [tangent_angle(s) for s in s_values]
+# 计算参数方程 x(s) 和 y(s)
+x = x0 + cumtrapz(np.cos(theta), s, initial=0)
+y = y0 + cumtrapz(np.sin(theta), s, initial=0)
 
+# 绘制曲线
 plt.figure(figsize=(10, 6))
-plt.plot(s_values, np.degrees(angles), label='Tangent Angle (degrees)')
-plt.xlabel('Arc Length (s)')
-plt.ylabel('Tangent Angle (degrees)')
-plt.title('Tangent Angle vs. Arc Length')
+plt.plot(x, y, label='Reconstructed Curve from Curvature')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Reconstructed Curve from Arc Length-Curvature Relationship')
 plt.legend()
 plt.grid(True)
 plt.show()
